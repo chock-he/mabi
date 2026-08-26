@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>에린 항해일지 · 마비노기 정보모음집</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff;
+    --surface:#f7f8f6;
+    --surface-2:#f1f3ee;
+    --border:#e3e6e0;
+    --text:#1c211d;
+    --text-dim:#767f75;
+    --accent:#2f6b52;
+    --accent-strong:#245641;
+    --accent-soft:#e7f1eb;
+    --danger:#c0503c;
+    --danger-soft:#faeae6;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Noto Sans KR', sans-serif;
+    min-height:100vh;
+    padding-bottom:60px;
+  }
+  .display{font-family:'Noto Sans KR', sans-serif; font-weight:800;}
+  .mono{font-family:'Noto Sans KR', sans-serif; font-variant-numeric:tabular-nums;}
+
+  /* ---------- header ---------- */
+  header.hero{
+    position:relative;
+    padding:40px 20px 28px;
+    border-bottom:1px solid var(--border);
+    background:var(--surface);
+  }
+  .hero-inner{max-width:1080px;margin:0 auto;position:relative;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:10px;
+    font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); margin-bottom:14px;
+  }
+  .eyebrow::before{content:"";width:22px;height:2px;background:var(--accent);display:inline-block;border-radius:2px;}
+  h1.title{
+    font-size:clamp(26px,4vw,38px);
+    margin:0 0 10px;
+    letter-spacing:-.01em;
+    color:var(--text);
+    font-weight:800;
+  }
+  .subtitle{color:var(--text-dim); max-width:640px; line-height:1.7; font-size:15px; margin:0;}
+
+  /* reset clock strip */
+  .clocks{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:10px; margin-top:24px; max-width:1080px;
+  }
+  .clock-card{
+    border:1px solid var(--border);
+    background:#fff;
+    border-radius:10px;
+    padding:12px 14px;
+  }
+  .clock-card .label{font-size:11.5px; color:var(--text-dim); letter-spacing:.04em; font-weight:600;}
+  .clock-card .value{font-size:19px; margin-top:4px; color:var(--text); font-weight:700;}
+
+  /* ---------- nav ---------- */
+  nav.tabs{
+    max-width:1080px; margin:22px auto 0; padding:0 20px;
+    display:flex; gap:4px; flex-wrap:wrap;
+  }
+  nav.tabs button{
+    background:transparent; border:1px solid transparent;
+    color:var(--text-dim); padding:9px 16px; border-radius:8px;
+    font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:600; cursor:pointer;
+  }
+  nav.tabs button:hover{background:var(--surface-2); color:var(--text);}
+  nav.tabs button.active{
+    color:var(--accent-strong); background:var(--accent-soft);
+  }
+  main{max-width:1080px; margin:0 auto; padding:26px 20px 40px;}
+  section.panel{display:none;}
+  section.panel.active{display:block; animation:fadeIn .2s ease;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+
+  h2.section-title{
+    color:var(--text); font-size:19px; font-weight:800; letter-spacing:-.01em;
+    margin:32px 0 4px; display:flex; align-items:center; gap:10px;
+  }
+  h2.section-title:first-child{margin-top:6px;}
+  h2.section-title::after{content:"";flex:1;height:1px;background:var(--border);}
+  .section-desc{color:var(--text-dim); font-size:13px; margin:0 0 16px; line-height:1.6;}
+
+  .card{
+    background:#fff;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:18px;
+    margin-bottom:14px;
+    box-shadow:0 1px 2px rgba(20,30,20,0.03);
+  }
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  @media(max-width:720px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+  /* checklist */
+  ul.checklist{list-style:none; margin:0; padding:0;}
+  ul.checklist li{
+    display:flex; align-items:flex-start; gap:10px;
+    padding:10px 4px; border-bottom:1px solid var(--border);
+    font-size:14.5px; line-height:1.5;
+  }
+  ul.checklist li:last-child{border-bottom:none;}
+  ul.checklist input[type=checkbox]{
+    appearance:none; width:18px; height:18px; margin-top:2px;
+    border:1.5px solid #c7cec3; border-radius:5px; flex:none; cursor:pointer;
+    background:#fff; position:relative;
+  }
+  ul.checklist input[type=checkbox]:checked{background:var(--accent); border-color:var(--accent);}
+  ul.checklist input[type=checkbox]:checked::after{
+    content:"✓"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:12px; color:#fff; font-weight:700;
+  }
+  ul.checklist label.done{color:var(--text-dim); text-decoration:line-through;}
+  .item-note{font-size:12px; color:var(--text-dim); display:block; margin-top:2px;}
+  .remove-x{margin-left:auto; background:none; border:none; color:var(--danger); cursor:pointer; font-size:12.5px; opacity:.7; font-family:'Noto Sans KR',sans-serif;}
+  .remove-x:hover{opacity:1;}
+
+  .add-row{display:flex; gap:8px; margin-top:12px;}
+  input[type=text], input[type=number], input[type=password], select, textarea{
+    background:#fff; border:1px solid var(--border); color:var(--text);
+    padding:8px 10px; border-radius:8px; font-family:'Noto Sans KR',sans-serif; font-size:13.5px;
+  }
+  textarea{width:100%; resize:vertical; font-family:'Noto Sans KR',sans-serif;}
+  input:focus, select:focus, textarea:focus{outline:2px solid var(--accent); outline-offset:1px; border-color:var(--accent);}
+  button.btn{
+    background:var(--accent);
+    color:#fff; border:none; padding:9px 16px; border-radius:8px;
+    font-weight:700; cursor:pointer; font-family:'Noto Sans KR',sans-serif; font-size:13.5px;
+  }
+  button.btn:hover{background:var(--accent-strong);}
+  button.btn.ghost{
+    background:#fff; border:1px solid var(--border); color:var(--text);
+  }
+  button.btn.ghost:hover{background:var(--surface-2);}
+  button.btn.danger{background:var(--danger); color:#fff;}
+  button.btn.small{padding:6px 12px; font-size:12px; border-radius:7px;}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  th,td{padding:10px 10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top;}
+  th{color:var(--text-dim); font-weight:700; font-size:11.5px; letter-spacing:.04em; text-transform:uppercase;}
+  tr:hover td{background:var(--surface);}
+  .tag{
+    display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px;
+    border:1px solid var(--border); background:var(--surface-2); color:var(--text-dim);
+    margin-right:4px; white-space:nowrap;
+  }
+  .tag.combat{border-color:#cfe3d5; color:var(--accent-strong); background:var(--accent-soft);}
+  .tag.life{border-color:#cfe0ea; color:#2a5f7a; background:#eaf3f8;}
+  .muted{color:var(--text-dim); font-size:12.5px;}
+  .divider{height:1px; background:var(--border); margin:22px 0;}
+
+  .charcard{border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:16px; background:#fff; box-shadow:0 1px 2px rgba(20,30,20,0.03);}
+  .charcard-head{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;}
+  .charcard-head input[type=text]{font-size:16px; font-weight:800; color:var(--text); background:transparent; border:none; border-bottom:1.5px solid var(--border); padding:2px 0; border-radius:0;}
+  .field{margin-bottom:10px;}
+  .field label{display:block; font-size:11.5px; color:var(--text-dim); font-weight:700; letter-spacing:.02em; margin-bottom:4px;}
+  .field input, .field textarea{width:100%;}
+
+  .banner{border:1px solid var(--border); background:var(--surface); border-radius:12px; padding:14px 16px; font-size:13px; color:var(--text-dim); line-height:1.7; margin-bottom:16px;}
+  .banner b{color:var(--text);}
+  .privacy-note{font-size:11.5px; color:var(--text-dim); margin-top:6px;}
+  .privacy-note.shared{color:#a5722f;}
+
+  .auction-result{margin-top:16px;}
+  .price{font-weight:700; color:var(--accent-strong);}
+  .loading{color:var(--text-dim); font-size:13px;}
+  .error-box{border:1px solid #e7c3ba; background:var(--danger-soft); padding:12px 14px; border-radius:10px; font-size:13px; color:#8a3a29;}
+
+  footer{max-width:1080px; margin:30px auto 0; padding:16px 20px; text-align:center; color:var(--text-dim); font-size:11.5px; border-top:1px solid var(--border);}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow">Milletian's Log · 밀레시안의 항해일지</span>
+    <h1 class="title display">에린 항해일지</h1>
+    <p class="subtitle">마비노기(PC) 밀레시안들을 위한 정보모음집. 할 일, 재능별 장비, 던전 드랍, 경매장 시세, 각자의 캐릭터 장부까지 한 곳에서.</p>
+    <div class="clocks">
+      <div class="clock-card"><div class="label">오늘</div><div class="value mono" id="clock-today">-</div></div>
+      <div class="clock-card"><div class="label">이번 주</div><div class="value mono" id="clock-week">-</div></div>
+      <div class="clock-card"><div class="label">일간 완료</div><div class="value mono" id="progress-daily">0/0</div></div>
+      <div class="clock-card"><div class="label">주간 완료</div><div class="value mono" id="progress-weekly">0/0</div></div>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button data-tab="home" class="active">홈</button>
+  <button data-tab="todo">할 일 (일·주·월간)</button>
+  <button data-tab="jobs">재능 &amp; 장비</button>
+  <button data-tab="dungeons">던전 &amp; 드랍</button>
+  <button data-tab="auction">경매장 시세</button>
+  <button data-tab="mypage">내 캐릭터</button>
+</nav>
+
+<main>
+
+  <!-- ============ HOME ============ -->
+  <section class="panel active" id="panel-home">
+    <div class="banner">
+      이 페이지는 <b>큰 틀</b>부터 잡아둔 버전이에요. 재능별 장비 추천과 던전 드랍 표는 확인된 정보 위주로 채워뒀고,
+      메타가 자주 바뀌는 마비노기 특성상 각 표의 <b>내용 편집</b> 버튼으로 다같이 계속 업데이트해나갈 수 있게 만들었어요.
+      편집한 내용은 이 페이지를 보는 모두에게 공유돼요.
+    </div>
+    <h2 class="section-title">한눈에 보기</h2>
+    <div class="grid3">
+      <div class="card">
+        <div class="tag">일간</div>
+        <p style="margin:10px 0 0; font-size:13.5px; color:var(--text-dim);">일일 던전 클리어, 알바, 생활 콘텐츠 위주. '할 일' 탭에서 체크하세요.</p>
+      </div>
+      <div class="card">
+        <div class="tag">주간</div>
+        <p style="margin:10px 0 0; font-size:13.5px; color:var(--text-dim);">크롬 바스 / 글렌 베르나 등 주간 레이드형 던전, 두카트 교역 한도 등.</p>
+      </div>
+      <div class="card">
+        <div class="tag">월간</div>
+        <p style="margin:10px 0 0; font-size:13.5px; color:var(--text-dim);">길드 콘텐츠, 월간 이벤트 보상, 부가 서비스 갱신 체크.</p>
+      </div>
+    </div>
+    <h2 class="section-title">구성</h2>
+    <ul class="checklist" style="font-size:14px;">
+      <li>📋 <b>할 일</b> — 일간/주간/월간 체크리스트 (개인별로 저장됩니다)</li>
+      <li>⚔️ <b>재능 &amp; 장비</b> — 전투/생활 재능별 추천 장비 표 (다같이 편집)</li>
+      <li>🗝️ <b>던전 &amp; 드랍</b> — 던전별 주요 드랍 아이템 표 (다같이 편집)</li>
+      <li>💰 <b>경매장 시세</b> — 넥슨 오픈 API 연동, 드랍템 시세 바로 조회</li>
+      <li>🧙 <b>내 캐릭터</b> — 나만 보는 개인 장비/골드/메모 페이지 (엑셀처럼 관리)</li>
+    </ul>
+  </section>
+
+  <!-- ============ TODO ============ -->
+  <section class="panel" id="panel-todo">
+    <h2 class="section-title">일간 할 일</h2>
+    <p class="section-desc">기준: 매일 초기화. 체크 상태는 나만 볼 수 있게 저장돼요.</p>
+    <div class="card">
+      <ul class="checklist" id="list-daily"></ul>
+      <div class="add-row">
+        <input type="text" id="input-daily" placeholder="예: 일일 던전 가이드 클리어" style="flex:1;">
+        <button class="btn" onclick="addTodo('daily')">추가</button>
+      </div>
+    </div>
+
+    <h2 class="section-title">주간 할 일</h2>
+    <p class="section-desc">기준: 매주 초기화 (게임 내 실제 초기화 요일은 콘텐츠마다 달라요 — 월요일/목요일 등 직접 확인).</p>
+    <div class="card">
+      <ul class="checklist" id="list-weekly"></ul>
+      <div class="add-row">
+        <input type="text" id="input-weekly" placeholder="예: 크롬 바스 주간 클리어" style="flex:1;">
+        <button class="btn" onclick="addTodo('weekly')">추가</button>
+      </div>
+    </div>
+
+    <h2 class="section-title">월간 할 일</h2>
+    <p class="section-desc">기준: 매월 초기화.</p>
+    <div class="card">
+      <ul class="checklist" id="list-monthly"></ul>
+      <div class="add-row">
+        <input type="text" id="input-monthly" placeholder="예: 길드 던전 월간 보상 수령" style="flex:1;">
+        <button class="btn" onclick="addTodo('monthly')">추가</button>
+      </div>
+    </div>
+    <p class="privacy-note">🔒 이 체크리스트는 개인 저장(비공개)입니다. 나만 보고, 나만 초기화해요.</p>
+    <div style="margin-top:10px;">
+      <button class="btn ghost small" onclick="resetPeriod('daily')">일간 체크 초기화</button>
+      <button class="btn ghost small" onclick="resetPeriod('weekly')">주간 체크 초기화</button>
+      <button class="btn ghost small" onclick="resetPeriod('monthly')">월간 체크 초기화</button>
+    </div>
+  </section>
+
+  <!-- ============ JOBS ============ -->
+  <section class="panel" id="panel-jobs">
+    <div class="banner">
+      마비노기는 '재능(탈렌트)' 단위로 성장합니다. 아래는 현재 존재하는 주요 재능과 추천 장비의 <b>기본 틀</b>이에요.
+      메타가 자주 바뀌니 실제 세팅은 최신 공략과 대조해서 편집해주세요.
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:8px; margin-bottom:8px;">
+      <button class="btn ghost small" id="jobs-edit-btn" onclick="toggleEdit('jobs')">표 편집하기</button>
+      <button class="btn small" id="jobs-save-btn" style="display:none;" onclick="saveJobsEdit()">저장</button>
+    </div>
+    <div id="jobs-view"></div>
+    <div id="jobs-editor" style="display:none;">
+      <textarea id="jobs-textarea" rows="22" style="width:100%; font-family:'JetBrains Mono',monospace; font-size:12.5px;"></textarea>
+      <p class="muted">형식: <span class="mono">계열|재능명|주 무기·방어구 추천|비고</span> — 한 줄에 재능 하나. 계열은 전투 또는 생활.</p>
+    </div>
+    <p class="privacy-note shared">🌐 이 표는 공유 데이터입니다. 편집하면 이 페이지를 보는 모두에게 반영돼요.</p>
+  </section>
+
+  <!-- ============ DUNGEONS ============ -->
+  <section class="panel" id="panel-dungeons">
+    <div class="banner">
+      확인된 최신 정보를 기준으로 채워뒀어요 (예: 크롬 바스 → 나이트브링어 무기/아다만티움/글라스 기브넨 재료, 테흐 두인 → 페러시우스 장비).
+      확실하지 않은 칸은 <span class="mono">확인 필요</span>로 남겨뒀으니, 실제로 얻은 드랍을 채워주시면 정확도가 올라가요.
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:8px; margin-bottom:8px;">
+      <button class="btn ghost small" id="dungeons-edit-btn" onclick="toggleEdit('dungeons')">표 편집하기</button>
+      <button class="btn small" id="dungeons-save-btn" style="display:none;" onclick="saveDungeonsEdit()">저장</button>
+    </div>
+    <div id="dungeons-view"></div>
+    <div id="dungeons-editor" style="display:none;">
+      <textarea id="dungeons-textarea" rows="18" style="width:100%; font-family:'JetBrains Mono',monospace; font-size:12.5px;"></textarea>
+      <p class="muted">형식: <span class="mono">주기|던전명|주요 드랍|비고</span> — 주기는 일간/주간/월간/상시 중 하나.</p>
+    </div>
+    <p class="privacy-note shared">🌐 이 표는 공유 데이터입니다. 편집하면 이 페이지를 보는 모두에게 반영돼요.</p>
+  </section>
+
+  <!-- ============ AUCTION ============ -->
+  <section class="panel" id="panel-auction">
+    <h2 class="section-title">경매장 시세 조회</h2>
+    <p class="section-desc">넥슨 오픈 API의 '경매장 정보 조회'를 이용해요. 던전 드랍 표에서 아이템 이름을 그대로 복사해서 검색해보세요.</p>
+
+    <div class="card">
+      <div class="field">
+        <label>넥슨 오픈 API 키</label>
+        <input type="password" id="api-key" placeholder="openapi.nexon.com 에서 발급받은 키를 입력" style="width:100%;">
+        <p class="privacy-note">🔒 이 키는 이 브라우저(내 계정)에만 비공개로 저장돼요. 다른 사람에게는 보이지 않아요.</p>
+      </div>
+      <div class="add-row">
+        <input type="text" id="auction-item" placeholder="아이템 이름 (예: 나이트브링어)" style="flex:1;">
+        <button class="btn" onclick="searchAuction()">시세 검색</button>
+      </div>
+      <div id="auction-result" class="auction-result"></div>
+    </div>
+
+    <div class="banner">
+      API 키가 없다면 <a href="https://openapi.nexon.com/" target="_blank" style="color:var(--accent-strong); font-weight:700;">openapi.nexon.com</a>에서
+      애플리케이션을 등록하고 '마비노기' API 사용 동의를 받으면 발급돼요 (승인까지 시간이 걸릴 수 있어요).
+      브라우저에서 직접 호출하는 방식이라 넥슨 서버 정책에 따라 요청이 막히는 경우, 별도의 서버(프록시)를 두는 방식으로 바꿔야 할 수도 있어요 — 막히면 알려주세요, 그 구조로 다시 만들어드릴게요.
+    </div>
+  </section>
+
+  <!-- ============ MYPAGE ============ -->
+  <section class="panel" id="panel-mypage">
+    <h2 class="section-title">내 캐릭터 장부</h2>
+    <p class="section-desc">엑셀처럼 원하는 만큼 캐릭터(부캐 포함)를 추가하고, 장비·무기·보유 골드·목표·메모를 자유롭게 적어두세요.</p>
+    <p class="privacy-note">🔒 이 페이지는 완전히 개인 저장(비공개)이에요. 같이 보는 친구들에게는 보이지 않고, 나만 볼 수 있어요.</p>
+    <div id="char-list"></div>
+    <button class="btn" onclick="addCharacter()">+ 캐릭터 추가</button>
+  </section>
+
+</main>
+
+<footer>
+  Data based on NEXON Open API · 개인 저장 데이터는 이 브라우저의 계정에만 귀속됩니다.
+</footer>
+
+<script>
+/* ---------------- storage helpers ---------------- */
+async function sGet(key, shared){
+  try{ const r = await window.storage.get(key, !!shared); return r ? r.value : null; }
+  catch(e){ return null; }
+}
+async function sSet(key, value, shared){
+  try{ await window.storage.set(key, value, !!shared); }
+  catch(e){ console.error('storage set failed', key, e); }
+}
+function parseJSON(str, fallback){
+  try{ return JSON.parse(str); }catch(e){ return fallback; }
+}
+
+/* ---------------- tabs ---------------- */
+document.querySelectorAll('nav.tabs button').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('section.panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ---------------- clock ---------------- */
+function isoWeek(d){
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = (date.getUTCDay() + 6) % 7;
+  date.setUTCDate(date.getUTCDate() - dayNum + 3);
+  const firstThursday = new Date(Date.UTC(date.getUTCFullYear(),0,4));
+  const week = 1 + Math.round(((date - firstThursday) / 86400000 - 3 + ((firstThursday.getUTCDay()+6)%7)) / 7);
+  return date.getUTCFullYear()+'-W'+String(week).padStart(2,'0');
+}
+function todayKey(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function weekKey(){ return isoWeek(new Date()); }
+function monthKey(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+function renderClock(){
+  document.getElementById('clock-today').textContent = todayKey();
+  document.getElementById('clock-week').textContent = weekKey();
+}
+renderClock();
+
+/* ---------------- default data ---------------- */
+const DEFAULT_DAILY = ["일일 던전 가이드 클리어 (반복 보상)","오늘의 알바(파트타임) 완료","생활 알바(요리/채집/제작 등) 확인","우편함·인챈트 스크롤 정리"];
+const DEFAULT_WEEKLY = ["크롬 바스 / 글렌 베르나 주간 클리어 보상 수령","테흐 두인 주간 임무 확인","두카트 교역 주간 한도 사용","목요일 초기화 세공 도구 구매(수수한 세공 도구 등)"];
+const DEFAULT_MONTHLY = ["길드 던전/길드 퀘스트 보상 확인","월간 이벤트 던전 보상 수령","프리미엄 서비스(VIP 등) 만료일 체크"];
+
+const DEFAULT_JOBS = [
+ ["전투","전사 (한손검/두손검/도끼)","리퍼/발러 계열 무기, 판금 계열 방어구","입문 난이도 낮고 생존력 좋음"],
+ ["전투","궁수 (장궁/석궁)","라모어 활 계열, 경갑 계열 방어구","사거리·명중 세공이 핵심"],
+ ["전투","마법사 (파이어/아이스/라이트닝)","완드/스태프 계열, 로브 계열","마법 공격력·캐스팅 속도 세공"],
+ ["전투","힐러 (연금술/치유)","홀리 스태프 계열","파티 지원 특화, 솔플엔 비추천"],
+ ["전투","음유시인","악기(하프/라우트 등)","버프·군중제어 특화"],
+ ["전투","도적","대거/체인 블레이드","은신·기습 딜링 특화"],
+ ["전투","다크나이트","다크나이트 대검","변신 시스템 기반, 진입 장벽 있음"],
+ ["전투","팔라딘","팔라딘 대검/방패","탱커형 변신 클래스"],
+ ["전투","랜스(스피어)","랜스 계열 창","돌진형 근접 딜러"],
+ ["전투","격투가","너클 계열","맨손 특화, 세공 우선순위 확인 필요"],
+ ["전투","매커닉","캐논/견인 장비","공성전·특수 콘텐츠 특화"],
+ ["전투","클로저","체인 블레이드","확인 필요 — 최신 무기 갱신 필요"],
+ ["전투","점성술 (전투)","낫(사이드) 계열","오브 보조, 스킬 커스터마이즈"],
+ ["전투","마기그래피","마기그래프 도구","버프/디버프 특화, 세팅 확인 필요"],
+ ["전투","닌자","수리검/쿠나이","원거리+보조 스킬 혼합형"],
+ ["생활","대장기술","해머, 모루 도구","장비 제작 핵심 생활 스킬"],
+ ["생활","재봉","가위, 재봉 도구","방어구/의상 제작"],
+ ["생활","요리","조리 도구","버프 음식 제작, 파티 필수 생활"],
+ ["생활","채집","채집 도구 일체","광물/약초/가죽 등 재료 수급"],
+ ["생활","연금술","연금술 배틀 라이프 실린더","포션/폭탄류 생산"],
+ ["생활","핸디크래프트","공구 세트","소품/장신구 제작"],
+ ["생활","교역(상업)","교역 마차/짐수레","두카트 획득의 핵심 콘텐츠"],
+ ["생활","낚시","낚싯대","특수 재료/장식 아이템 획득"],
+ ["생활","매직크래프트","매직크래프트 도구","확인 필요 — 최신 정보 갱신 필요"],
+ ["생활","음악(작곡)","악보 제작 도구","연주 콘텐츠와 연계"]
+];
+
+const DEFAULT_DUNGEONS = [
+ ["주간","크롬 바스 (Crom Bás)","나이트브링어 무기, 아다만티움, 글라스 기브넨의 깃털·심장, 리파인드 방어구","쉬움/일반 난이도 존재, 쉬움은 거래 불가 아이템 위주"],
+ ["주간","글렌 베르나","리파인드 방어구, 수표","크롬 바스와 클리어 보상 공유 여부는 패치마다 다름 — 확인 필요"],
+ ["상시","테흐 두인 (Teh Duinn)","페러시우스 장비","고난이도 진입용 장비 파밍처"],
+ ["일간","일일 던전 가이드 (등급별)","세공 도구, 인챈트 스크롤, 골드 수표","등급이 높을수록 보상 좋음, 반복 클리어 보상 확인"],
+ ["상시","오스카 (글라스 기브넨 관련 던전)","확인 필요","레이드성 콘텐츠, 최신 명칭/보상 갱신 필요"],
+ ["월간","길드 던전","확인 필요","길드원과 함께 채워주세요"]
+];
+
+/* ---------------- TODO logic ---------------- */
+async function loadTodos(period){
+  const key = 'todo:'+period+':'+ (period==='daily'?todayKey():period==='weekly'?weekKey():monthKey());
+  let raw = await sGet(key, false);
+  let items = parseJSON(raw, null);
+  if(!items){
+    const defaults = period==='daily'?DEFAULT_DAILY:period==='weekly'?DEFAULT_WEEKLY:DEFAULT_MONTHLY;
+    items = defaults.map(t=>({text:t, done:false}));
+    await sSet(key, JSON.stringify(items), false);
+  }
+  return {key, items};
+}
+async function renderTodos(period){
+  const {key, items} = await loadTodos(period);
+  const ul = document.getElementById('list-'+period);
+  ul.innerHTML='';
+  items.forEach((it, idx)=>{
+    const li = document.createElement('li');
+    const cb = document.createElement('input');
+    cb.type='checkbox'; cb.checked = it.done;
+    cb.addEventListener('change', async ()=>{
+      it.done = cb.checked;
+      await sSet(key, JSON.stringify(items), false);
+      lbl.className = it.done?'done':'';
+      updateProgress();
+    });
+    const lbl = document.createElement('span');
+    lbl.textContent = it.text;
+    lbl.className = it.done?'done':'';
+    const del = document.createElement('button');
+    del.className='remove-x'; del.textContent='삭제';
+    del.addEventListener('click', async ()=>{
+      items.splice(idx,1);
+      await sSet(key, JSON.stringify(items), false);
+      renderTodos(period);
+      updateProgress();
+    });
+    li.appendChild(cb); li.appendChild(lbl); li.appendChild(del);
+    ul.appendChild(li);
+  });
+  updateProgress();
+}
+async function addTodo(period){
+  const input = document.getElementById('input-'+period);
+  const text = input.value.trim();
+  if(!text) return;
+  const {key, items} = await loadTodos(period);
+  items.push({text, done:false});
+  await sSet(key, JSON.stringify(items), false);
+  input.value='';
+  renderTodos(period);
+}
+async function resetPeriod(period){
+  if(!confirm('이번 '+({daily:'일간',weekly:'주간',monthly:'월간'}[period])+' 체크를 모두 초기화할까요?')) return;
+  const {key, items} = await loadTodos(period);
+  items.forEach(it=>it.done=false);
+  await sSet(key, JSON.stringify(items), false);
+  renderTodos(period);
+}
+async function updateProgress(){
+  const d = parseJSON(await sGet('todo:daily:'+todayKey(), false), []);
+  const w = parseJSON(await sGet('todo:weekly:'+weekKey(), false), []);
+  document.getElementById('progress-daily').textContent = (d.filter(i=>i.done).length)+'/'+d.length;
+  document.getElementById('progress-weekly').textContent = (w.filter(i=>i.done).length)+'/'+w.length;
+}
+renderTodos('daily'); renderTodos('weekly'); renderTodos('monthly');
+
+/* ---------------- JOBS table (shared) ---------------- */
+function jobsToTSV(rows){ return rows.map(r=>r.join('|')).join('\n'); }
+function tsvToRows(tsv){ return tsv.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>l.split('|').map(s=>s.trim())); }
+
+async function loadJobs(){
+  const raw = await sGet('jobsdata', true);
+  return parseJSON(raw, null) || DEFAULT_JOBS;
+}
+function renderJobsTable(rows){
+  const combat = rows.filter(r=>r[0]==='전투');
+  const life = rows.filter(r=>r[0]==='생활');
+  function tbl(list, cls){
+    let html = '<table><thead><tr><th>재능</th><th>추천 무기·방어구</th><th>비고</th></tr></thead><tbody>';
+    list.forEach(r=>{
+      html += `<tr><td><span class="tag ${cls}">${r[0]}</span> ${r[1]}</td><td>${r[2]}</td><td class="muted">${r[3]||''}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    return html;
+  }
+  document.getElementById('jobs-view').innerHTML =
+    '<h3 style="color:var(--text-light); font-size:15px; margin:6px 0;">⚔ 전투 재능</h3>' + tbl(combat,'combat') +
+    '<div class="divider"></div>' +
+    '<h3 style="color:var(--text-light); font-size:15px; margin:6px 0;">🛠 생활 재능</h3>' + tbl(life,'life');
+}
+async function initJobs(){
+  const rows = await loadJobs();
+  renderJobsTable(rows);
+  document.getElementById('jobs-textarea').value = jobsToTSV(rows);
+}
+async function saveJobsEdit(){
+  const rows = tsvToRows(document.getElementById('jobs-textarea').value);
+  await sSet('jobsdata', JSON.stringify(rows), true);
+  renderJobsTable(rows);
+  toggleEdit('jobs');
+}
+initJobs();
+
+/* ---------------- DUNGEONS table (shared) ---------------- */
+async function loadDungeons(){
+  const raw = await sGet('dungeonsdata', true);
+  return parseJSON(raw, null) || DEFAULT_DUNGEONS;
+}
+function renderDungeonsTable(rows){
+  let html = '<table><thead><tr><th>주기</th><th>던전</th><th>주요 드랍</th><th>비고</th></tr></thead><tbody>';
+  rows.forEach(r=>{
+    html += `<tr><td><span class="tag">${r[0]}</span></td><td><b>${r[1]}</b></td><td>${r[2]}</td><td class="muted">${r[3]||''}</td></tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('dungeons-view').innerHTML = html;
+}
+async function initDungeons(){
+  const rows = await loadDungeons();
+  renderDungeonsTable(rows);
+  document.getElementById('dungeons-textarea').value = jobsToTSV(rows);
+}
+async function saveDungeonsEdit(){
+  const rows = tsvToRows(document.getElementById('dungeons-textarea').value);
+  await sSet('dungeonsdata', JSON.stringify(rows), true);
+  renderDungeonsTable(rows);
+  toggleEdit('dungeons');
+}
+initDungeons();
+
+function toggleEdit(which){
+  const view = document.getElementById(which+'-view');
+  const editor = document.getElementById(which+'-editor');
+  const editBtn = document.getElementById(which+'-edit-btn');
+  const saveBtn = document.getElementById(which+'-save-btn');
+  const editing = editor.style.display !== 'none';
+  editor.style.display = editing ? 'none':'block';
+  view.style.display = editing ? 'block':'none';
+  editBtn.style.display = editing ? 'inline-block':'none';
+  saveBtn.style.display = editing ? 'none':'inline-block';
+}
+
+/* ---------------- AUCTION ---------------- */
+async function initAuctionKey(){
+  const saved = await sGet('nexon_api_key', false);
+  if(saved) document.getElementById('api-key').value = saved;
+}
+document.getElementById('api-key').addEventListener('change', async (e)=>{
+  await sSet('nexon_api_key', e.target.value.trim(), false);
+});
+initAuctionKey();
+
+async function searchAuction(){
+  const key = document.getElementById('api-key').value.trim();
+  const itemName = document.getElementById('auction-item').value.trim();
+  const resultBox = document.getElementById('auction-result');
+  if(!key){ resultBox.innerHTML = '<div class="error-box">먼저 넥슨 오픈 API 키를 입력해주세요.</div>'; return; }
+  if(!itemName){ resultBox.innerHTML = '<div class="error-box">검색할 아이템 이름을 입력해주세요.</div>'; return; }
+  resultBox.innerHTML = '<p class="loading">조회 중...</p>';
+  const url = 'https://open.api.nexon.com/mabinogi/v1/auction/list?item_name=' + encodeURIComponent(itemName);
+  try{
+    const res = await fetch(url, { headers: { 'x-nxopen-api-key': key } });
+    if(!res.ok){
+      const errText = await res.text();
+      resultBox.innerHTML = `<div class="error-box">요청 실패 (HTTP ${res.status}). 브라우저에서 직접 호출이 막혔거나(CORS), 엔드포인트 경로가 최신 문서와 다를 수 있어요.<br><span class="muted">${errText.slice(0,200)}</span></div>`;
+      return;
+    }
+    const data = await res.json();
+    const list = data.auction_item || data.items || data.auction_list || [];
+    if(!Array.isArray(list) || list.length===0){
+      resultBox.innerHTML = '<p class="muted">등록된 매물이 없거나, 응답 형식이 예상과 달라요. 아래 원본 응답을 참고해주세요.</p><pre class="mono" style="white-space:pre-wrap; font-size:11px; color:var(--text-dim);">'+JSON.stringify(data,null,2).slice(0,1500)+'</pre>';
+      return;
+    }
+    let html = '<table><thead><tr><th>아이템</th><th>가격</th><th>등록 종료</th></tr></thead><tbody>';
+    list.slice(0,20).forEach(it=>{
+      html += `<tr><td>${it.item_name||itemName}</td><td class="price">${(it.auction_price_per_unit||it.item_price||'-').toLocaleString?.() || (it.auction_price_per_unit||it.item_price||'-')} G</td><td class="muted">${it.date_auction_expire||'-'}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    resultBox.innerHTML = html;
+  }catch(err){
+    resultBox.innerHTML = `<div class="error-box">호출 중 오류가 발생했어요: ${err.message}. 브라우저 콘솔에서 CORS 오류가 보인다면, 넥슨 API를 대신 호출해줄 작은 서버(프록시)가 필요해요 — 원하면 그 구조로 다시 만들어드릴게요.</div>`;
+  }
+}
+
+/* ---------------- MY CHARACTERS (personal) ---------------- */
+async function loadChars(){
+  const raw = await sGet('characters', false);
+  return parseJSON(raw, []);
+}
+async function saveChars(chars){
+  await sSet('characters', JSON.stringify(chars), false);
+}
+async function renderChars(){
+  const chars = await loadChars();
+  const box = document.getElementById('char-list');
+  box.innerHTML='';
+  chars.forEach((c, idx)=>{
+    const div = document.createElement('div');
+    div.className='charcard';
+    div.innerHTML = `
+      <div class="charcard-head">
+        <input type="text" value="${escapeHtml(c.name||'')}" placeholder="캐릭터 이름" data-field="name" />
+        <button class="remove-x" data-action="delete">삭제</button>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>주 재능</label><input type="text" data-field="job" value="${escapeHtml(c.job||'')}" placeholder="예: 전사"></div>
+        <div class="field"><label>보유 골드</label><input type="text" data-field="gold" value="${escapeHtml(c.gold||'')}" placeholder="예: 1억 2천"></div>
+        <div class="field"><label>무기</label><input type="text" data-field="weapon" value="${escapeHtml(c.weapon||'')}" placeholder="예: 나이트브링어"></div>
+        <div class="field"><label>방어구 세트</label><input type="text" data-field="armor" value="${escapeHtml(c.armor||'')}" placeholder="예: 리파인드 세트"></div>
+      </div>
+      <div class="field"><label>목표 / 다음 파밍 아이템</label><input type="text" data-field="goal" value="${escapeHtml(c.goal||'')}" placeholder="예: 아다만티움 5개 더 모으기"></div>
+      <div class="field"><label>메모</label><textarea data-field="memo" rows="3" placeholder="자유롭게 메모하세요">${escapeHtml(c.memo||'')}</textarea></div>
+    `;
+    div.querySelectorAll('[data-field]').forEach(el=>{
+      el.addEventListener('change', async ()=>{
+        const chars2 = await loadChars();
+        chars2[idx][el.dataset.field] = el.value;
+        await saveChars(chars2);
+      });
+    });
+    div.querySelector('[data-action="delete"]').addEventListener('click', async ()=>{
+      if(!confirm('이 캐릭터 카드를 삭제할까요?')) return;
+      const chars2 = await loadChars();
+      chars2.splice(idx,1);
+      await saveChars(chars2);
+      renderChars();
+    });
+    box.appendChild(div);
+  });
+  if(chars.length===0){
+    box.innerHTML = '<p class="muted">아직 캐릭터가 없어요. 아래 버튼으로 추가해보세요.</p>';
+  }
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+async function addCharacter(){
+  const chars = await loadChars();
+  chars.push({name:'새 캐릭터', job:'', gold:'', weapon:'', armor:'', goal:'', memo:''});
+  await saveChars(chars);
+  renderChars();
+}
+renderChars();
+</script>
+</body>
+</html>
