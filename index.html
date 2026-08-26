@@ -192,6 +192,7 @@
     <span class="eyebrow">Milletian's Log · 밀레시안의 항해일지</span>
     <h1 class="title display">에린 항해일지</h1>
     <p class="subtitle">마비노기(PC) 밀레시안들을 위한 정보모음집. 할 일, 재능별 장비, 던전 드랍, 경매장 시세, 각자의 캐릭터 장부까지 한 곳에서.</p>
+    <div id="nickname-bar" style="font-size:12.5px; color:var(--text-dim); margin-top:14px;"></div>
     <div class="clocks">
       <div class="clock-card"><div class="label">오늘</div><div class="value mono" id="clock-today">-</div></div>
       <div class="clock-card"><div class="label">이번 주</div><div class="value mono" id="clock-week">-</div></div>
@@ -275,7 +276,7 @@
         <button class="btn" onclick="addTodo('monthly')">추가</button>
       </div>
     </div>
-    <p class="privacy-note">🔒 이 체크리스트는 개인 저장(비공개)입니다. 나만 보고, 나만 초기화해요.</p>
+    <p class="privacy-note">🔒 이 체크리스트는 내 닉네임으로 저장돼요. 다른 닉네임을 쓰는 사람에게는 안 보여요.</p>
     <div style="margin-top:10px;">
       <button class="btn ghost small" onclick="resetPeriod('daily')">일간 체크 초기화</button>
       <button class="btn ghost small" onclick="resetPeriod('weekly')">주간 체크 초기화</button>
@@ -328,7 +329,7 @@
       <div class="field">
         <label>넥슨 오픈 API 키</label>
         <input type="password" id="api-key" placeholder="openapi.nexon.com 에서 발급받은 키를 입력" style="width:100%;">
-        <p class="privacy-note">🔒 이 키는 이 브라우저(내 계정)에만 비공개로 저장돼요. 다른 사람에게는 보이지 않아요.</p>
+        <p class="privacy-note">🔒 이 키는 내 닉네임으로 저장돼요. 다만 백엔드가 완전한 로그인 시스템은 아니라서, 신원이 확실한 사람들끼리만 공유하는 걸 권장해요.</p>
       </div>
       <div class="add-row">
         <input type="text" id="auction-item" placeholder="아이템 이름 (예: 나이트브링어)" style="flex:1;">
@@ -348,7 +349,7 @@
   <section class="panel" id="panel-mypage">
     <h2 class="section-title">내 캐릭터 장부</h2>
     <p class="section-desc">엑셀처럼 원하는 만큼 캐릭터(부캐 포함)를 추가하고, 장비·무기·보유 골드·목표·메모를 자유롭게 적어두세요.</p>
-    <p class="privacy-note">🔒 이 페이지는 완전히 개인 저장(비공개)이에요. 같이 보는 친구들에게는 보이지 않고, 나만 볼 수 있어요.</p>
+    <p class="privacy-note">🔒 이 페이지는 내 닉네임으로 저장돼요. 다른 닉네임을 쓰는 사람 화면에는 안 보여요. (완전한 로그인 보안은 아니니, 민감한 정보는 적지 않는 걸 권장해요.)</p>
     <div id="char-list"></div>
     <button class="btn" onclick="addCharacter()">+ 캐릭터 추가</button>
   </section>
@@ -356,22 +357,71 @@
 </main>
 
 <footer>
-  Data based on NEXON Open API · 개인 저장 데이터는 이 브라우저의 계정에만 귀속됩니다.
+  Data based on NEXON Open API · 데이터는 구글 시트에 저장되며, 닉네임 단위로 구분됩니다.
 </footer>
 
 <script>
-/* ---------------- storage helpers ---------------- */
+/* ---------------- CONFIG ----------------
+   아래 URL을 구글 앱스 스크립트 배포 후 나오는 웹 앱 주소로 바꿔주세요.
+   (Code.gs 파일의 안내 참고, .../exec 로 끝나는 주소)
+*/
+const CONFIG = {
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/여기에_배포_ID를_붙여넣으세요/exec'
+};
+
+/* ---------------- nickname (개인 데이터 구분용) ---------------- */
+function getNickname(){ return localStorage.getItem('mabi_nickname') || ''; }
+function setNickname(name){ localStorage.setItem('mabi_nickname', name); }
+
+function ensureNicknameUI(){
+  const bar = document.getElementById('nickname-bar');
+  const saved = getNickname();
+  if(saved){
+    bar.innerHTML = `내 닉네임: <b>${escapeHtml(saved)}</b> <button class="btn ghost small" id="nickname-change">바꾸기</button>`;
+    document.getElementById('nickname-change').addEventListener('click', promptNickname);
+  }else{
+    bar.innerHTML = `<span style="color:#a5722f;">개인 데이터(할 일 체크, 내 캐릭터, API 키)를 저장하려면 닉네임을 먼저 정해주세요.</span> <button class="btn small" id="nickname-set">닉네임 정하기</button>`;
+    document.getElementById('nickname-set').addEventListener('click', promptNickname);
+  }
+}
+function promptNickname(){
+  const name = prompt('닉네임을 입력하세요 (개인 데이터 구분용, 언제든 바꿀 수 있어요)', getNickname());
+  if(name && name.trim()){
+    setNickname(name.trim());
+    ensureNicknameUI();
+    location.reload();
+  }
+}
+
+/* ---------------- storage helpers (Google Apps Script 백엔드) ---------------- */
 async function sGet(key, shared){
-  try{ const r = await window.storage.get(key, !!shared); return r ? r.value : null; }
-  catch(e){ return null; }
+  const owner = shared ? '' : getNickname();
+  if(!shared && !owner) return null;
+  try{
+    const url = CONFIG.APPS_SCRIPT_URL + '?key=' + encodeURIComponent(key) + '&owner=' + encodeURIComponent(owner);
+    const res = await fetch(url);
+    const data = await res.json();
+    if(!data.ok) throw new Error(data.error || 'unknown error');
+    return data.value;
+  }catch(e){ console.error('sGet failed', key, e); return null; }
 }
 async function sSet(key, value, shared){
-  try{ await window.storage.set(key, value, !!shared); }
-  catch(e){ console.error('storage set failed', key, e); }
+  const owner = shared ? '' : getNickname();
+  if(!shared && !owner) return;
+  try{
+    const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'}, // preflight(OPTIONS) 방지용
+      body: JSON.stringify({key, owner, value})
+    });
+    const data = await res.json();
+    if(!data.ok) throw new Error(data.error || 'unknown error');
+  }catch(e){ console.error('sSet failed', key, e); }
 }
 function parseJSON(str, fallback){
   try{ return JSON.parse(str); }catch(e){ return fallback; }
 }
+ensureNicknameUI();
 
 /* ---------------- tabs ---------------- */
 document.querySelectorAll('nav.tabs button').forEach(btn=>{
